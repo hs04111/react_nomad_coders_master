@@ -24,14 +24,34 @@ const Boards = styled.div`
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoAtom);
 
-  const onDragEnd = ({ destination, source, draggableId }: DropResult) => {
+  const onDragEnd = (info: DropResult) => {
+    const { destination, source, draggableId } = info;
     if (!destination) return;
-    // setToDos((prev) => {
-    //   const arr = [...prev];
-    //   arr.splice(source.index, 1);
-    //   arr.splice(destination?.index, 0, draggableId);
-    //   return arr;
-    // });
+    if (destination.droppableId === source.droppableId) {
+      setToDos((allBoards) => {
+        const newArr = [...allBoards[destination.droppableId]];
+        newArr.splice(source.index, 1);
+        newArr.splice(destination?.index, 0, draggableId);
+        return {
+          ...allBoards,
+          [source.droppableId]: newArr,
+        };
+        // object의 key에 변수로 쓰려면 대괄호로 감싼다.
+      });
+    } else if (destination.droppableId !== source.droppableId) {
+      setToDos((allBoards) => {
+        const sourceArr = [...allBoards[source.droppableId]];
+        const destArr = [...allBoards[destination.droppableId]];
+        sourceArr.splice(source.index, 1);
+        destArr.splice(destination?.index, 0, draggableId);
+        return {
+          ...allBoards,
+          [source.droppableId]: sourceArr,
+          [destination.droppableId]: destArr,
+        };
+        // object의 key에 변수로 쓰려면 대괄호로 감싼다.
+      });
+    }
   };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
