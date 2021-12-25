@@ -1,70 +1,31 @@
-import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { useRecoilState } from 'recoil';
+import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { toDoAtom } from './atoms';
-import Board from './components/Board';
-
 const Wrapper = styled.div`
+  height: 100vh;
+  width: 100vw;
   display: flex;
-  max-width: 680px;
-  width: 100%;
-  margin: 0 auto;
   justify-content: center;
   align-items: center;
-  height: 100vh;
 `;
 
-const Boards = styled.div`
-  display: grid;
-  width: 100%;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+const Box = styled(motion.div)`
+  width: 200px;
+  height: 200px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
 `;
-
 function App() {
-  const [toDos, setToDos] = useRecoilState(toDoAtom);
-
-  const onDragEnd = (info: DropResult) => {
-    const { destination, source, draggableId } = info;
-    if (!destination) return;
-    if (destination.droppableId === source.droppableId) {
-      setToDos((allBoards) => {
-        const newArr = [...allBoards[destination.droppableId]];
-        const taskObj = newArr[source.index];
-        newArr.splice(source.index, 1);
-        newArr.splice(destination?.index, 0, taskObj);
-        return {
-          ...allBoards,
-          [source.droppableId]: newArr,
-        };
-        // object의 key에 변수로 쓰려면 대괄호로 감싼다.
-      });
-    } else if (destination.droppableId !== source.droppableId) {
-      setToDos((allBoards) => {
-        const sourceArr = [...allBoards[source.droppableId]];
-        const taskObj = sourceArr[source.index];
-        const destArr = [...allBoards[destination.droppableId]];
-        sourceArr.splice(source.index, 1);
-        destArr.splice(destination?.index, 0, taskObj);
-        return {
-          ...allBoards,
-          [source.droppableId]: sourceArr,
-          [destination.droppableId]: destArr,
-        };
-        // object의 key에 변수로 쓰려면 대괄호로 감싼다.
-      });
-    }
-  };
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Wrapper>
-        <Boards>
-          {Object.keys(toDos).map((boardId) => (
-            <Board key={boardId} boardId={boardId} toDos={toDos[boardId]} />
-          ))}
-        </Boards>
-      </Wrapper>
-    </DragDropContext>
+    <Wrapper>
+      <Box
+        initial={{ scale: 0 }}
+        animate={{ scale: 1, borderRadius: '50px', rotateZ: 360 }}
+        transition={{ type: 'spring', damping: 5 }}
+        // transition docs
+        // https://www.framer.com/docs/transition
+      />
+    </Wrapper>
   );
 }
 
