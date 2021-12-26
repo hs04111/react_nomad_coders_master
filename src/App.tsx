@@ -1,4 +1,4 @@
-import { motion, useMotionValue } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
@@ -24,6 +24,7 @@ function App() {
   const x = useMotionValue(0);
   // x는 계속 추적되지만, 값이 바뀐다고 re-rendering이 일어나지는 않는다.
   // 계속 렌더링되면 퍼포먼스 측면에서 좋지 않다
+  const scale = useTransform(x, [-800, 0, 800], [10, 5, 0.1]);
   useEffect(() => {
     x.onChange(() => {
       console.log(x.get());
@@ -34,7 +35,7 @@ function App() {
     <Wrapper>
       {/* https://www.framer.com/docs/gestures/#drag */}
 
-      <Box drag="x" style={{ x: x }} dragSnapToOrigin />
+      <Box drag="x" style={{ x: x, scale: scale }} dragSnapToOrigin />
     </Wrapper>
   );
 }
