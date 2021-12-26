@@ -10,9 +10,19 @@ const Wrapper = styled(motion.div)`
   align-items: center;
 `;
 
+const Grid = styled.div`
+  display: grid;
+  width: 50vw;
+  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  div:first-child,
+  div:last-child {
+    grid-column: span 2;
+  }
+`;
+
 const Box = styled(motion.div)`
-  width: 400px;
-  height: 400px;
+  height: 200px;
   background-color: rgba(255, 255, 255, 1);
   border-radius: 40px;
   display: flex;
@@ -21,29 +31,38 @@ const Box = styled(motion.div)`
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
 `;
 
-const Circle = styled(motion.div)`
-  background-color: #00a5ff;
-  height: 100px;
-  width: 100px;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+const Overlap = styled(motion.div)`
+  position: absolute;
+  height: 100%;
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
-// layoutId를 같게 설정하면, 두 컴포넌트를 같은 것으로 취급하여 애니메이션으로 연결한다.
 function App() {
-  const [clicked, setClicked] = useState(false);
-  const toggleClicked = () => setClicked((prev) => !prev);
+  const [index, setIndex] = useState('');
   return (
-    <Wrapper onClick={toggleClicked}>
-      <Box>
-        {!clicked ? (
-          <Circle layoutId="circle" style={{ borderRadius: 50 }} />
+    <Wrapper>
+      <Grid>
+        <Box layoutId="1" onClick={() => setIndex('1')} />
+        <Box layoutId="2" onClick={() => setIndex('2')} />
+        <Box layoutId="3" onClick={() => setIndex('3')} />
+        <Box layoutId="4" onClick={() => setIndex('4')} />
+      </Grid>
+      <AnimatePresence>
+        {index !== '' ? (
+          <Overlap
+            initial={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+            animate={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+            exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+            onClick={() => setIndex('')}
+          >
+            <Box style={{ width: '200px' }} layoutId={index} />
+          </Overlap>
         ) : null}
-      </Box>
-      <Box>
-        {clicked ? (
-          <Circle layoutId="circle" style={{ borderRadius: 0, scale: 2 }} />
-        ) : null}
-      </Box>
+      </AnimatePresence>
     </Wrapper>
   );
 }
