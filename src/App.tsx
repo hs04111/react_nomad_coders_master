@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
@@ -9,11 +10,21 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 
+const BiggerBox = styled.div`
+  width: 600px;
+  height: 600px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* overflow: hidden; */
+  /* 넘어간 것이 보이지 않으려면 overflow: hidden */
+`;
+
 const Box = styled(motion.div)`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  width: 200px;
-  height: 200px;
+  width: 50px;
+  height: 50px;
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
@@ -22,26 +33,26 @@ const Box = styled(motion.div)`
 const boxVariants = {
   click: { scale: 0.7, borderRadius: '100px' },
   hover: { rotateZ: 90, scale: 1.5 },
-  drag: {
-    backgroundColor: '#173438',
-    transition: {
-      duration: 3,
-    },
-  },
-  // color를 animate하려면 문자열로 된 ('blue') 색 말고 헥사코드나 rgb를 사용할것
-  // 숫자여야 한다
 };
 
 function App() {
+  const biggerBoxRef = useRef(null);
+
   return (
     <Wrapper>
-      <Box
-        drag
-        whileDrag="drag"
-        variants={boxVariants}
-        whileTap="click"
-        whileHover="hover"
-      />
+      {/* https://www.framer.com/docs/gestures/#drag */}
+      <BiggerBox ref={biggerBoxRef}>
+        <Box
+          drag
+          dragSnapToOrigin={true}
+          dragConstraints={biggerBoxRef}
+          dragElastic={0.3}
+          // {left: -200, right:...} 이렇게 상하좌우를 직접 정해줘도 된다
+          variants={boxVariants}
+          whileTap="click"
+          whileHover="hover"
+        />
+      </BiggerBox>
     </Wrapper>
   );
 }
