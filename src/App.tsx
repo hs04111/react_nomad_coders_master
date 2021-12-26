@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { useRef } from 'react';
+import { motion, useMotionValue } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
@@ -10,18 +10,6 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 
-const BiggerBox = styled.div`
-  width: 600px;
-  height: 600px;
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* overflow: hidden; */
-  /* 넘어간 것이 보이지 않으려면 overflow: hidden */
-`;
-
 const Box = styled(motion.div)`
   width: 50px;
   height: 50px;
@@ -30,29 +18,23 @@ const Box = styled(motion.div)`
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
 `;
 
-const boxVariants = {
-  click: { scale: 0.7, borderRadius: '100px' },
-  hover: { rotateZ: 90, scale: 1.5 },
-};
+const boxVariants = {};
 
 function App() {
-  const biggerBoxRef = useRef(null);
-
+  const x = useMotionValue(0);
+  // x는 계속 추적되지만, 값이 바뀐다고 re-rendering이 일어나지는 않는다.
+  // 계속 렌더링되면 퍼포먼스 측면에서 좋지 않다
+  useEffect(() => {
+    x.onChange(() => {
+      console.log(x.get());
+    });
+  }, [x]);
+  // useEffect 내부의 get(), set(), onChange() 함수들은 Framer motion에서 온 함수들이다.
   return (
     <Wrapper>
       {/* https://www.framer.com/docs/gestures/#drag */}
-      <BiggerBox ref={biggerBoxRef}>
-        <Box
-          drag
-          dragSnapToOrigin={true}
-          dragConstraints={biggerBoxRef}
-          dragElastic={0.3}
-          // {left: -200, right:...} 이렇게 상하좌우를 직접 정해줘도 된다
-          variants={boxVariants}
-          whileTap="click"
-          whileHover="hover"
-        />
-      </BiggerBox>
+
+      <Box drag="x" style={{ x: x }} dragSnapToOrigin />
     </Wrapper>
   );
 }
