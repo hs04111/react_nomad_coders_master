@@ -1,58 +1,82 @@
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  useViewportScroll,
-} from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled(motion.div)`
-  height: 200vh;
+  height: 100vh;
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 `;
 
 const Box = styled(motion.div)`
-  width: 50px;
-  height: 50px;
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  top: 100px;
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
 `;
 
-const boxVariants = {};
+// https://www.framer.com/docs/component/###custom
+// Box component에 custom으로 지정하면 variants에서 인자로 사용가능
+// AnmatePresence에도 custom을 적지 않으면 오작동한다.
+const boxVariants = {
+  entry: (forward: boolean) => ({
+    x: forward ? 300 : -300,
+    opacity: 0,
+    scale: 0,
+  }),
+  center: { x: 0, opacity: 1, scale: 1, transition: { duration: 0.2 } },
+  exit: (forward: boolean) => ({
+    x: forward ? -300 : 300,
+    opacity: 0,
+    scale: 0,
+    transition: { duration: 0.2 },
+  }),
+};
 
 function App() {
-  const x = useMotionValue(0);
+  const [visible, setVisible] = useState(1);
+  const [forward, setForward] = useState(true);
 
-  // x는 계속 추적되지만, 값이 바뀐다고 re-rendering이 일어나지는 않는다.
-  // 계속 렌더링되면 퍼포먼스 측면에서 좋지 않다
-  // https://www.framer.com/docs/motionvalue/
-  const rotateZ = useTransform(x, [-800, 800], [-360, 720]);
-  const gradient = useTransform(
-    x,
-    [-800, 0, 800],
-    [
-      'linear-gradient(135deg, rgb(0, 210, 238), rgb(0, 83, 238))',
-      'linear-gradient(135deg, rgb(238, 0, 153), rgb(221, 0, 238))',
-      'linear-gradient(135deg, rgb(0, 238, 155), rgb(238, 178, 0))',
-    ],
-  );
-  const { scrollYProgress } = useViewportScroll();
-  // https://www.framer.com/docs/motionvalue/##useviewportscroll
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 5]);
-  useEffect(() => {
-    x.onChange(() => {
-      console.log(x.get());
-    });
-  }, [x]);
-  // useEffect 내부의 get(), set(), onChange() 함수들은 Framer motion에서 온 함수들이다.
+  const nextPlease = () => {
+    setForward(true);
+    setVisible((prev) => (prev === 6 ? 6 : prev + 1));
+  };
+  const prevPlease = () => {
+    setForward(false);
+    setVisible((prev) => (prev === 1 ? 1 : prev - 1));
+  };
+
   return (
-    <Wrapper style={{ background: gradient }}>
-      <Box drag="x" style={{ x: x, rotateZ, scale }} dragSnapToOrigin />
+    <Wrapper>
+      <AnimatePresence custom={forward} exitBeforeEnter>
+        {/* https://www.framer.com/docs/animate-presence/ */}
+        {/* AnimatePresence 내부에는 조건문으로 특정 컴포넌트의 존재 유무를 따져야 한다 */}
+        {/* exitBeforeEnter는 exit이 끝난 후 다음이 시작되도록 한다. */}
+        <Box
+          custom={forward}
+          variants={boxVariants}
+          initial="entry"
+          animate="center"
+          exit="exit"
+          key={visible}
+        >
+          {visible}
+        </Box>
+        {/* Box 6개 만들기: key를 바꿔주기만 해도 element가 사라진 것으로 본다 */}
+        {/* 그렇게 다시 렌더링이 일어날 것 */}
+      </AnimatePresence>
+      <button onClick={nextPlease}>Next</button>
+      <button onClick={prevPlease}>Previous</button>
     </Wrapper>
   );
 }
